@@ -1,29 +1,80 @@
+72% of storage used … If you run out, you can't create, edit, and upload files. Get 30 GB for ₱10 for 3 months ₱49.
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audzzie's Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audzzie's Portfolio</title>
 
-<link rel="stylesheet" href="css/style.css">
-<script defer src="js/script.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script defer src="assets/js/script.js"></script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 
 <body class="index-background">
 
-<div class="float-container">
-<img src="images/shape1.png" class="float-img index-shape1">
-<img src="images/shape6.png" class="float-img index-shape6">
-<img src="images/shape3.png" class="float-img index-shape3">
-<img src="images/shape4.png" class="float-img index-shape4">
-</div>
+  <header class="site-header">
+    <a href="index.html" class="brand">
+      <img src="assets/images/logo.png" class="logo" alt="ZieZie Portfolio Logo">
+      <span>ZieZie Portfolio</span>
+    </a>
 
-<div class="center">
-<h1>Welcome to My Creative Space</h1>
-<button onclick="location.href='about.html'">Enter Portfolio</button>
-</div>
+    <button class="menu-toggle" aria-label="Open navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <nav class="nav-bar">
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="contact.html">Contact</a>
+      </div>
+
+      <div class="social">
+        <a href="https://www.instagram.com/marsu.audzz?igsh=MWx1c2F2MXgxejM3Mg==" target="_blank" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://www.facebook.com/share/17zyLV4o9A/" target="_blank" aria-label="Facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+        <a href="https://youtube.com/@heyitzaudzzie4232?si=bf477tCG7ML1W5uI" target="_blank" aria-label="YouTube">
+          <i class="fab fa-youtube"></i>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="float-container" aria-hidden="true">
+    <img src="assets/images/shape1.png" class="float one" alt="">
+    <img src="assets/images/shape6.png" class="float two" alt="">
+    <img src="assets/images/shape3.png" class="float three" alt="">
+    <img src="assets/images/shape4.png" class="float four" alt="">
+  </div>
+
+  <main class="home-main">
+    <section class="home-hero reveal">
+      <p class="eyebrow">Artist • Designer • Storyteller </p>
+
+      <h1>Welcome to My Creative Space</h1>
+
+      <p class="hero-copy">
+        A very personal online portfolio filled with digital art, photography, traditional originals,
+        graphic design, 3D works, 2D animations, and creativity.
+      </p>
+
+      <div class="hero-actions">
+        <a href="about.html" class="btn primary-btn">Enter Portfolio</a>
+        <a href="gallery.html" class="btn ghost-btn">View My Works</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 ZieZie Portfolio</p>
+  </footer>
 
 </body>
 </html>
