@@ -1,4 +1,3 @@
-72% of storage used … If you run out, you can't create, edit, and upload files. Get 30 GB for ₱10 for 3 months ₱49.
 document.addEventListener("DOMContentLoaded", function () {
 
   /* ===========================
@@ -125,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
   =========================== */
 
   const revealElements = document.querySelectorAll(
-    ".reveal, .edu-block, .skills li, .gallery-category, .gallery-row img, .gallery-row video"
+    ".reveal, .edu-block, .skills li, .gallery-category, .gallery-row img, .youtube-card"
   );
 
   revealElements.forEach(function (element, index) {
@@ -175,10 +174,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       slider.classList.add("drag-active");
 
-      if (slider.setPointerCapture) {
-        slider.setPointerCapture(event.pointerId);
-      }
-
       startX = event.pageX - slider.offsetLeft;
       scrollLeft = slider.scrollLeft;
     });
@@ -197,144 +192,121 @@ document.addEventListener("DOMContentLoaded", function () {
 
         setTimeout(function () {
           slider.classList.remove("was-dragging");
-        }, 150);
+        }, 180);
       }
     });
 
     slider.addEventListener("pointermove", function (event) {
       if (!isDown) return;
 
-      event.preventDefault();
-
       const x = event.pageX - slider.offsetLeft;
       const distance = x - startX;
 
-      if (Math.abs(distance) > 6) {
+      if (Math.abs(distance) > 8) {
         moved = true;
+        event.preventDefault();
+        slider.scrollLeft = scrollLeft - distance * 1.8;
       }
-
-      slider.scrollLeft = scrollLeft - distance * 1.8;
     });
   });
 
 
   /* ===========================
-     GALLERY POP-UP / LIGHTBOX
+     SCREEN-FIXED IMAGE LIGHTBOX
   =========================== */
 
-  const lightbox = document.getElementById("lightbox");
-  const lightboxImg = document.getElementById("lightbox-img");
-  const lightboxVideo = document.getElementById("lightbox-video");
+  const screenLightbox = document.createElement("div");
+  screenLightbox.className = "screen-lightbox";
+  screenLightbox.innerHTML = `
+    <div class="screen-lightbox-box">
+      <button class="screen-lightbox-close" type="button" aria-label="Close image">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <img class="screen-lightbox-img" src="" alt="Expanded gallery image">
+    </div>
+  `;
+
+  document.body.appendChild(screenLightbox);
+
+  const screenLightboxImg = screenLightbox.querySelector(".screen-lightbox-img");
+  const screenLightboxClose = screenLightbox.querySelector(".screen-lightbox-close");
 
   function galleryWasDragged(element) {
     const row = element.closest(".gallery-row");
     return row && row.classList.contains("was-dragging");
   }
 
-  function closeLightbox() {
-    if (!lightbox || !lightboxImg || !lightboxVideo) return;
+  function openScreenLightbox(imageSource, imageAlt) {
+    if (!imageSource) return;
 
-    lightbox.classList.remove("active");
+    screenLightboxImg.setAttribute("src", imageSource);
+    screenLightboxImg.setAttribute("alt", imageAlt || "Expanded gallery image");
 
-    lightboxVideo.pause();
-    lightboxVideo.removeAttribute("src");
-    lightboxVideo.load();
+    screenLightbox.classList.add("active");
 
-    lightboxImg.removeAttribute("src");
-
-    lightboxImg.style.display = "none";
-    lightboxVideo.style.display = "none";
-
-    document.body.style.overflow = "";
+    document.documentElement.classList.add("no-scroll");
+    document.body.classList.add("no-scroll");
   }
 
-  window.closeLightbox = closeLightbox;
+  function closeScreenLightbox() {
+    screenLightbox.classList.remove("active");
+    screenLightboxImg.setAttribute("src", "");
 
-  if (lightbox && lightboxImg && lightboxVideo) {
-
-    lightboxImg.style.display = "none";
-    lightboxVideo.style.display = "none";
-
-    /* IMAGE POP-UP */
-    document.querySelectorAll(".gallery-row img").forEach(function (img) {
-      img.addEventListener("click", function () {
-        if (galleryWasDragged(img)) return;
-
-        lightbox.classList.add("active");
-
-        lightboxVideo.pause();
-        lightboxVideo.removeAttribute("src");
-        lightboxVideo.load();
-        lightboxVideo.style.display = "none";
-
-        lightboxImg.src = img.src;
-        lightboxImg.alt = img.alt || "Expanded gallery image";
-        lightboxImg.style.display = "block";
-
-        document.body.style.overflow = "hidden";
-      });
-    });
-
-
-    /* VIDEO HOVER PREVIEW */
-    document.querySelectorAll(".gallery-row video").forEach(function (video) {
-
-      video.addEventListener("mouseenter", function () {
-        video.muted = true;
-        video.play().catch(function () {});
-      });
-
-      video.addEventListener("mouseleave", function () {
-        video.pause();
-        video.currentTime = 0;
-      });
-
-
-      /* VIDEO POP-UP WITH SOUND */
-      video.addEventListener("click", function () {
-        if (galleryWasDragged(video)) return;
-
-        lightbox.classList.add("active");
-
-        video.pause();
-
-        lightboxImg.removeAttribute("src");
-        lightboxImg.style.display = "none";
-
-        lightboxVideo.src = video.currentSrc || video.src;
-        lightboxVideo.style.display = "block";
-        lightboxVideo.controls = true;
-        lightboxVideo.muted = false;
-        lightboxVideo.volume = 1;
-        lightboxVideo.currentTime = 0;
-
-        document.body.style.overflow = "hidden";
-
-        lightboxVideo.play().catch(function () {
-          /*
-            Some browsers block autoplay with sound.
-            If that happens, the video controls are visible,
-            so the viewer can press play manually.
-          */
-        });
-      });
-    });
-
-
-    /* CLICK OUTSIDE TO CLOSE */
-    lightbox.addEventListener("click", function (event) {
-      if (event.target === lightbox) {
-        closeLightbox();
-      }
-    });
-
-
-    /* ESC KEY TO CLOSE */
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && lightbox.classList.contains("active")) {
-        closeLightbox();
-      }
-    });
+    document.documentElement.classList.remove("no-scroll");
+    document.body.classList.remove("no-scroll");
   }
+
+  window.closeLightbox = closeScreenLightbox;
+
+  document.querySelectorAll(".gallery-row img").forEach(function (img) {
+    if (img.closest(".youtube-card")) return;
+
+    img.addEventListener("click", function () {
+      if (galleryWasDragged(img)) return;
+
+      openScreenLightbox(
+        img.getAttribute("src"),
+        img.getAttribute("alt")
+      );
+    });
+  });
+
+  screenLightboxClose.addEventListener("click", closeScreenLightbox);
+
+  screenLightbox.addEventListener("click", function (event) {
+    if (event.target === screenLightbox) {
+      closeScreenLightbox();
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && screenLightbox.classList.contains("active")) {
+      closeScreenLightbox();
+    }
+  });
+
+
+  /* ===========================
+     YOUTUBE ANIMATION LINKS
+  =========================== */
+
+  document.querySelectorAll(".youtube-card").forEach(function (card) {
+    card.addEventListener("click", function (event) {
+      const row = card.closest(".gallery-row");
+
+      if (row && row.classList.contains("was-dragging")) {
+        event.preventDefault();
+        return;
+      }
+
+      event.stopPropagation();
+
+      const youtubeLink = card.getAttribute("href");
+
+      if (youtubeLink) {
+        window.open(youtubeLink, "_blank");
+      }
+    });
+  });
 
 });
