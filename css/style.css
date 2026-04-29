@@ -1,4 +1,3 @@
-72% of storage used … If you run out, you can't create, edit, and upload files. Get 30 GB for ₱10 for 3 months ₱49.
 /* ===========================
    GLOBAL STYLES
 =========================== */
@@ -30,13 +29,17 @@ html {
   scroll-behavior: smooth;
 }
 
+html.no-scroll,
+body.no-scroll {
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   font-family: "Poppins", Arial, sans-serif;
   color: var(--black);
   background: var(--white);
   overflow-x: hidden;
-  animation: pageEnter 0.8s ease both;
 }
 
 body::selection {
@@ -58,19 +61,16 @@ video {
 main {
   position: relative;
   z-index: 2;
+  animation: pageFade 0.8s ease both;
 }
 
-@keyframes pageEnter {
+@keyframes pageFade {
   from {
     opacity: 0;
-    transform: translateY(18px);
-    filter: blur(8px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
   }
 }
 
@@ -81,7 +81,7 @@ main {
 .transition-screen {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: 9999998;
   background:
     radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.95), transparent 28%),
     radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.8), transparent 30%),
@@ -164,6 +164,11 @@ main {
   gap: 12px;
   font-weight: 900;
   letter-spacing: 0.03em;
+}
+
+.brand span {
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(199, 67, 120, 0.35);
 }
 
 .logo {
@@ -773,8 +778,7 @@ main {
   border-radius: 999px;
 }
 
-.gallery-row img,
-.gallery-row video {
+.gallery-row img {
   width: 290px;
   height: 210px;
   object-fit: cover;
@@ -790,152 +794,156 @@ main {
   border: 4px solid rgba(255, 255, 255, 0.76);
 }
 
-.gallery-row img:hover,
-.gallery-row video:hover {
+.gallery-row img:hover {
   transform: translateY(-10px) scale(1.04) rotate(-1deg);
   box-shadow: 0 25px 55px rgba(199, 67, 120, 0.28);
   filter: saturate(1.15);
 }
 
 /* ===========================
-   GALLERY POP-UP / LIGHTBOX
+   YOUTUBE ANIMATION THUMBNAILS
 =========================== */
 
-.lightbox {
+.youtube-card {
+  position: relative;
+  width: 290px;
+  height: 210px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 4px solid rgba(255, 255, 255, 0.76);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.17);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    filter 0.35s ease;
+}
+
+.youtube-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.youtube-card:hover {
+  transform: translateY(-10px) scale(1.04) rotate(-1deg);
+  box-shadow: 0 25px 55px rgba(199, 67, 120, 0.28);
+  filter: saturate(1.15);
+}
+
+.youtube-card:hover img {
+  transform: none;
+  box-shadow: none;
+}
+
+.play-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.18);
+  color: #ffffff;
+  font-size: 42px;
+  transition: 0.3s ease;
+}
+
+.play-icon i {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  padding-left: 5px;
+  border-radius: 50%;
+  background: rgba(255, 175, 199, 0.92);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+.youtube-card:hover .play-icon {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* ===========================
+   SCREEN-FIXED LIGHTBOX
+=========================== */
+
+.screen-lightbox {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 9999999;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 30px;
-
-  background:
-    radial-gradient(circle at center, rgba(255, 175, 199, 0.25), transparent 35%),
-    rgba(0, 0, 0, 0.88);
-
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
 }
 
-.lightbox.active {
+.screen-lightbox.active {
   display: flex;
-  animation: popupFade 0.3s ease forwards;
 }
 
-@keyframes popupFade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.lightbox-box {
+.screen-lightbox-box {
   position: relative;
-  width: auto;
-  max-width: 96vw;
-  max-height: 92vh;
+  width: min(96vw, 1100px);
+  height: min(88vh, 820px);
+  height: min(88dvh, 820px);
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: popupZoom 0.35s ease forwards;
 }
 
-@keyframes popupZoom {
-  from {
-    transform: scale(0.85) translateY(20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-.lightbox img,
-.lightbox video {
-  display: none;
-  max-width: 96vw;
-  max-height: 88vh;
+.screen-lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
   width: auto;
   height: auto;
-
   object-fit: contain;
   border-radius: 24px;
-
-  background: #000;
-  border: 5px solid rgba(255, 255, 255, 0.8);
-
+  background: #ffffff;
+  border: 5px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 25px 90px rgba(0, 0, 0, 0.6),
+    0 25px 90px rgba(0, 0, 0, 0.65),
     0 0 35px rgba(255, 175, 199, 0.45);
 }
 
-.lightbox video {
-  width: min(1000px, 94vw);
+.screen-lightbox-img[src=""] {
+  display: none;
 }
 
-.lightbox-close {
+.screen-lightbox-close {
   position: absolute;
-  top: -22px;
-  right: -22px;
-
+  top: 12px;
+  right: 12px;
   width: 52px;
   height: 52px;
-
   border: none;
   border-radius: 50%;
-
   display: grid;
   place-items: center;
-
   background: #ffafc7;
   color: #1e1116;
-
   font-size: 25px;
   cursor: pointer;
-  z-index: 5;
-
+  z-index: 10000000;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
   transition: 0.3s ease;
 }
 
-.lightbox-close:hover {
+.screen-lightbox-close:hover {
   background: #ffffff;
   color: #c74378;
   transform: rotate(90deg) scale(1.08);
-}
-
-/* Makes the logo text white */
-.brand span {
-  color: #ffffff;
-  text-shadow: 0 2px 10px rgba(199, 67, 120, 0.35);
-}
-
-/* Responsive pop-up */
-@media (max-width: 600px) {
-  .lightbox {
-    padding: 18px;
-  }
-
-  .lightbox img,
-  .lightbox video {
-    max-width: 95vw;
-    max-height: 82vh;
-    border-radius: 18px;
-  }
-
-  .lightbox-close {
-    top: -16px;
-    right: -10px;
-    width: 45px;
-    height: 45px;
-    font-size: 22px;
-  }
 }
 
 /* ===========================
@@ -1183,7 +1191,7 @@ footer p {
   }
 
   .gallery-row img,
-  .gallery-row video {
+  .youtube-card {
     width: 245px;
     height: 175px;
   }
@@ -1196,6 +1204,28 @@ footer p {
   .contact-shape2,
   .contact-shape4 {
     width: 210px;
+  }
+}
+
+@media (max-width: 600px) {
+  .screen-lightbox {
+    padding: 16px;
+  }
+
+  .screen-lightbox-box {
+    width: 96vw;
+    height: 84vh;
+    height: 84dvh;
+  }
+
+  .screen-lightbox-img {
+    border-radius: 18px;
+  }
+
+  .screen-lightbox-close {
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
   }
 }
 
@@ -1242,7 +1272,7 @@ footer p {
   }
 
   .gallery-row img,
-  .gallery-row video {
+  .youtube-card {
     width: 220px;
     height: 158px;
   }
@@ -1253,14 +1283,5 @@ footer p {
 
   .contact-links a {
     width: 100%;
-  }
-
-  .lightbox {
-    padding: 18px;
-  }
-
-  .lightbox-close {
-    top: 18px;
-    right: 18px;
   }
 }
