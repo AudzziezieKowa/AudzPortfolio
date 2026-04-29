@@ -1,159 +1,340 @@
-document.addEventListener("DOMContentLoaded", function(){
+72% of storage used … If you run out, you can't create, edit, and upload files. Get 30 GB for ₱10 for 3 months ₱49.
+document.addEventListener("DOMContentLoaded", function () {
 
-/* ===== PAGE FADE TRANSITION ===== */
+  /* ===========================
+     PAGE TRANSITION
+  =========================== */
 
-document.querySelectorAll('a').forEach(link => {
+  const transitionScreen = document.createElement("div");
+  transitionScreen.className = "transition-screen";
+  document.body.appendChild(transitionScreen);
 
-if(link.getAttribute("href").startsWith("#")) return;
+  document.querySelectorAll("a[href]").forEach(function (link) {
+    const href = link.getAttribute("href");
 
-link.addEventListener('click', e => {
+    if (!href) return;
 
-e.preventDefault();
+    const isExternal = link.target === "_blank";
+    const isAnchor = href.startsWith("#");
+    const isMail = href.startsWith("mailto:");
+    const isPhone = href.startsWith("tel:");
+    const isHtmlPage = href.endsWith(".html");
 
-const target = link.href;
+    if (isExternal || isAnchor || isMail || isPhone || !isHtmlPage) return;
 
-document.body.classList.add('fade-out');
+    link.addEventListener("click", function (event) {
+      event.preventDefault();
 
-setTimeout(() => {
+      const target = link.href;
 
-window.location.href = target;
+      transitionScreen.classList.add("active");
 
-}, 400);
+      setTimeout(function () {
+        window.location.href = target;
+      }, 550);
+    });
+  });
 
-});
 
-});
+  /* ===========================
+     ACTIVE NAV LINK
+  =========================== */
 
+  const currentPage = window.location.pathname.split("/").pop() || "index.html";
 
+  document.querySelectorAll(".nav-links a").forEach(function (link) {
+    const linkPage = link.getAttribute("href");
 
-/* ===== DRAG TO SCROLL ===== */
+    if (linkPage === currentPage) {
+      link.classList.add("active");
+    }
+  });
 
-let sliders = document.querySelectorAll('.gallery-row');
 
-sliders.forEach(slider => {
+  /* ===========================
+     MOBILE NAVIGATION
+  =========================== */
 
-let isDown = false;
-let startX;
-let scrollLeft;
+  const menuToggle = document.querySelector(".menu-toggle");
+  const navBar = document.querySelector(".nav-bar");
 
-slider.addEventListener('mousedown', e => {
+  if (menuToggle && navBar) {
+    menuToggle.addEventListener("click", function () {
+      navBar.classList.toggle("open");
 
-isDown = true;
-startX = e.pageX - slider.offsetLeft;
-scrollLeft = slider.scrollLeft;
+      const icon = menuToggle.querySelector("i");
 
-});
+      if (!icon) return;
 
-slider.addEventListener('mouseleave', () => {
+      if (navBar.classList.contains("open")) {
+        icon.classList.remove("fa-bars");
+        icon.classList.add("fa-xmark");
+      } else {
+        icon.classList.remove("fa-xmark");
+        icon.classList.add("fa-bars");
+      }
+    });
+  }
 
-isDown = false;
 
-});
+  /* ===========================
+     SCROLL PROGRESS BAR
+  =========================== */
 
-slider.addEventListener('mouseup', () => {
+  const progressBar = document.createElement("div");
+  progressBar.className = "scroll-progress";
+  document.body.appendChild(progressBar);
 
-isDown = false;
+  function updateScrollProgress() {
+    const scrollTop = window.scrollY;
+    const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = documentHeight > 0 ? (scrollTop / documentHeight) * 100 : 0;
 
-});
+    progressBar.style.width = progress + "%";
+  }
 
-slider.addEventListener('mousemove', e => {
+  window.addEventListener("scroll", updateScrollProgress);
+  updateScrollProgress();
 
-if(!isDown) return;
 
-e.preventDefault();
+  /* ===========================
+     CURSOR GLOW
+  =========================== */
+
+  const canHover = window.matchMedia("(hover: hover)").matches;
+
+  if (canHover) {
+    const cursorGlow = document.createElement("div");
+    cursorGlow.className = "cursor-glow";
+    document.body.appendChild(cursorGlow);
+
+    window.addEventListener("pointermove", function (event) {
+      cursorGlow.style.opacity = "1";
+      cursorGlow.style.left = event.clientX + "px";
+      cursorGlow.style.top = event.clientY + "px";
+    });
+
+    window.addEventListener("pointerleave", function () {
+      cursorGlow.style.opacity = "0";
+    });
+  }
 
-const x = e.pageX - slider.offsetLeft;
+
+  /* ===========================
+     SCROLL REVEAL ANIMATION
+  =========================== */
+
+  const revealElements = document.querySelectorAll(
+    ".reveal, .edu-block, .skills li, .gallery-category, .gallery-row img, .gallery-row video"
+  );
+
+  revealElements.forEach(function (element, index) {
+    element.classList.add("reveal-item");
+
+    const delay = Math.min((index % 8) * 70, 420);
+    element.style.setProperty("--delay", delay + "ms");
+  });
 
-const walk = (x - startX) * 2;
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.14
+    });
 
-slider.scrollLeft = scrollLeft - walk;
+    revealElements.forEach(function (element) {
+      revealObserver.observe(element);
+    });
+  } else {
+    revealElements.forEach(function (element) {
+      element.classList.add("show");
+    });
+  }
 
-});
 
-});
+  /* ===========================
+     DRAG TO SCROLL GALLERY
+  =========================== */
 
+  const sliders = document.querySelectorAll(".gallery-row");
 
+  sliders.forEach(function (slider) {
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    let moved = false;
 
-/* ===== LIGHTBOX ===== */
+    slider.addEventListener("pointerdown", function (event) {
+      isDown = true;
+      moved = false;
 
-const lightbox = document.getElementById("lightbox");
+      slider.classList.add("drag-active");
 
-const lightboxImg = document.getElementById("lightbox-img");
+      if (slider.setPointerCapture) {
+        slider.setPointerCapture(event.pointerId);
+      }
 
-const lightboxVideo = document.getElementById("lightbox-video");
+      startX = event.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
 
+    slider.addEventListener("pointerleave", function () {
+      isDown = false;
+      slider.classList.remove("drag-active");
+    });
 
+    slider.addEventListener("pointerup", function () {
+      isDown = false;
+      slider.classList.remove("drag-active");
 
-/* IMAGE CLICK */
+      if (moved) {
+        slider.classList.add("was-dragging");
 
-document.querySelectorAll(".gallery-row img").forEach(img => {
+        setTimeout(function () {
+          slider.classList.remove("was-dragging");
+        }, 150);
+      }
+    });
 
-img.addEventListener("click", function(){
+    slider.addEventListener("pointermove", function (event) {
+      if (!isDown) return;
 
-lightbox.classList.add("active");
+      event.preventDefault();
 
-lightboxImg.src = this.src;
-lightboxImg.style.display = "block";
+      const x = event.pageX - slider.offsetLeft;
+      const distance = x - startX;
 
-lightboxVideo.pause();
-lightboxVideo.style.display = "none";
+      if (Math.abs(distance) > 6) {
+        moved = true;
+      }
 
-});
+      slider.scrollLeft = scrollLeft - distance * 1.8;
+    });
+  });
 
-});
 
+  /* ===========================
+     GALLERY POP-UP / LIGHTBOX
+  =========================== */
 
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightbox-img");
+  const lightboxVideo = document.getElementById("lightbox-video");
 
-/* VIDEO CLICK */
+  function galleryWasDragged(element) {
+    const row = element.closest(".gallery-row");
+    return row && row.classList.contains("was-dragging");
+  }
 
-document.querySelectorAll(".gallery-row video").forEach(video => {
+  function closeLightbox() {
+    if (!lightbox || !lightboxImg || !lightboxVideo) return;
 
-video.addEventListener("click", function(){
+    lightbox.classList.remove("active");
 
-lightbox.classList.add("active");
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute("src");
+    lightboxVideo.load();
 
-lightboxVideo.src = this.src;
+    lightboxImg.removeAttribute("src");
 
-lightboxVideo.style.display = "block";
+    lightboxImg.style.display = "none";
+    lightboxVideo.style.display = "none";
 
-lightboxVideo.muted = false;
+    document.body.style.overflow = "";
+  }
 
-lightboxVideo.currentTime = 0;
+  window.closeLightbox = closeLightbox;
 
-lightboxVideo.controls = true;
+  if (lightbox && lightboxImg && lightboxVideo) {
 
-lightboxVideo.play();
+    lightboxImg.style.display = "none";
+    lightboxVideo.style.display = "none";
 
-lightboxImg.style.display = "none";
+    /* IMAGE POP-UP */
+    document.querySelectorAll(".gallery-row img").forEach(function (img) {
+      img.addEventListener("click", function () {
+        if (galleryWasDragged(img)) return;
 
-});
+        lightbox.classList.add("active");
 
-});
+        lightboxVideo.pause();
+        lightboxVideo.removeAttribute("src");
+        lightboxVideo.load();
+        lightboxVideo.style.display = "none";
 
+        lightboxImg.src = img.src;
+        lightboxImg.alt = img.alt || "Expanded gallery image";
+        lightboxImg.style.display = "block";
 
+        document.body.style.overflow = "hidden";
+      });
+    });
 
-/* CLOSE LIGHTBOX */
 
-window.closeLightbox = function(){
+    /* VIDEO HOVER PREVIEW */
+    document.querySelectorAll(".gallery-row video").forEach(function (video) {
 
-lightbox.classList.remove("active");
+      video.addEventListener("mouseenter", function () {
+        video.muted = true;
+        video.play().catch(function () {});
+      });
 
-lightboxVideo.pause();
+      video.addEventListener("mouseleave", function () {
+        video.pause();
+        video.currentTime = 0;
+      });
 
-}
 
+      /* VIDEO POP-UP WITH SOUND */
+      video.addEventListener("click", function () {
+        if (galleryWasDragged(video)) return;
 
+        lightbox.classList.add("active");
 
-/* CLICK OUTSIDE CLOSE */
+        video.pause();
 
-lightbox.addEventListener("click", function(e){
+        lightboxImg.removeAttribute("src");
+        lightboxImg.style.display = "none";
 
-if(e.target === lightbox){
+        lightboxVideo.src = video.currentSrc || video.src;
+        lightboxVideo.style.display = "block";
+        lightboxVideo.controls = true;
+        lightboxVideo.muted = false;
+        lightboxVideo.volume = 1;
+        lightboxVideo.currentTime = 0;
 
-closeLightbox();
+        document.body.style.overflow = "hidden";
 
-}
+        lightboxVideo.play().catch(function () {
+          /*
+            Some browsers block autoplay with sound.
+            If that happens, the video controls are visible,
+            so the viewer can press play manually.
+          */
+        });
+      });
+    });
 
-});
+
+    /* CLICK OUTSIDE TO CLOSE */
+    lightbox.addEventListener("click", function (event) {
+      if (event.target === lightbox) {
+        closeLightbox();
+      }
+    });
+
+
+    /* ESC KEY TO CLOSE */
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && lightbox.classList.contains("active")) {
+        closeLightbox();
+      }
+    });
+  }
 
 });
